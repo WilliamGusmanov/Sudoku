@@ -1,8 +1,7 @@
 import java.util.*;
 import java.util.Random;
 
-// Version 2018-10-08 - Monday 8:00 PM
-// Branch_Orlando #2
+// Version 2018-10-10 - Wednesday
 
 public class SudokuPuzzle {
 
@@ -11,7 +10,7 @@ public class SudokuPuzzle {
 
 	// 2-Dimensional Map:   Key: String, Value: Set<Integer> 
 	// The key is a String which concatenates the row and column:
-	// i.e. A key of "01" means row 0, col 1.  A key of "74" is row 7, col 4.
+	// i.e. A key of 1 means row 0, col 1.  A key of 74 is row 7, col 4.
 	// The value mapped to the key is a set of Integers that can be played: {1,2,3,4,5,6,7,8,9}
 	// Sets have the faster get methods to test for membership compared to an Array
 	// This initial map will be populated in the Constructor
@@ -104,7 +103,7 @@ public class SudokuPuzzle {
 	//@For Debug
 	public static void main(String[] args){
 		SudokuPuzzle puzz = new SudokuPuzzle();
-		System.out.println(puzz.allowed_values.get(1));
+		// System.out.println(puzz.allowed_values.get(1));
 		//Set<Integer> numbers = new HashSet<Integer>();
 		//System.out.println(puzz.produceValue(numbers));	
 		puzz.addInitial();
@@ -114,46 +113,53 @@ public class SudokuPuzzle {
 	public void addInitial(){
 		// Initializes the board with 10 random legal positions! 
 		
-		for (int pos = 0; pos < 10; pos++){
-			//First, randomly generate a row and col coordination to be location of the number
+		for (int pos = 0; pos < 15; pos++){
+			// Generate coordinate
 			int vacant_coordinate = produceValue(this.vacancies);
-			int random_row = vacant_coordinate/10; // first digit
-			int random_col = vacant_coordinate%10; // last digit
-			this.vacancies.remove(vacant_coordinate); // Take that out of the vacant coordinate list
+			int random_row = vacant_coordinate/10; 
+			int random_col = vacant_coordinate%10; 
+			this.vacancies.remove(vacant_coordinate); 
 
-			// Second, randomly generate an allowed number for that position
+			// Produce valid value
 			Set<Integer> numbers_set = this.allowed_values.get(vacant_coordinate); // Get all the allowed numbers it can be
 			int value = produceValue(numbers_set); // Randomly pick one of the numbers
 			
-			// Thirdly, update that number to the actual board, and make it possible
+			// Update the board & start
 			this.board[random_row][random_col] = value;
 			this.start[random_row][random_col] = true; 
 
-			// Now we will update the allowed values
 			
-			for (int j = 0; j < 9; j++) { // Remove this value from every member in the entire rows
+			
+			// Update the allowed_values by row. j is the column. row stays constant
+			for (int j = 0; j < 9; j++) { 
 				int key = random_row*10 + j;
 				this.allowed_values.get(key).remove(value);
 			}
-			for (int i = 0; i <9; i++) { // Remove this value from every member in the entire col
+
+			// Update the allowed_values by column. i is the row. col stays constant
+			for (int i = 0; i <9; i++) { 
 				int key = i*10 + random_col;
 				this.allowed_values.get(key).remove(value);
 			}
 			// Remove this value from every member in the entire box
+			
 			// Box 1		Box 2		...
-			// [00 01 02 ]	[03 04 05]
-			// [10 11 12 ]	[13 14 15]
-			// [20 21 22 ]  [23 24 25]
+			// 0 [00 01 02 ]	[03 04 05]
+			// 1 [10 11 12 ]	[13 14 15]
+			// 2 [20 21 22 ]  [23 24 25]
 			// Box 4
-			// [30 31 32]
-			// [40 41 42]
-			// [50 51 52]
+			// 3 [30 31 32]
+			// 4 [40 41 42]
+			// 5 [50 51 52]
+
+
 
 
 			int box_row = (random_row/3)*3 ;
-			int box_col = random_col/3 ;
+			int box_col = (random_col/3)*3 ;
 			for (int i = box_row ; i < box_row + 3 ; i++ ){
 				for (int j = box_col ; j < box_col + 3 ; j++){
+
 					int key = i*10 + j;
 					this.allowed_values.get(key).remove(value);
 				}
@@ -200,6 +206,7 @@ public class SudokuPuzzle {
 	public void addGuess(row,col, value){
 		// sets the given square to the given value; 
 		// the value can be changed later by another call to addGuess
+		// while vacancies 
 		;
 	}
 */
@@ -218,11 +225,13 @@ public class SudokuPuzzle {
 		// 3+0	3+1	3+2
 		// 6+0	6+1	6+2
 
+		// any number between 0,1,2 when you divide by 3 becomes 0
+
 		for (int row = 0; row < 9; row ++ ){
 
 			for (int col = 0; col < 9; col ++) {
 
-				int box =  (row/3)*3 + (col/3) + 1; // Compute which box the coordinate belongs to based on its row/col position
+				int box =  (row/3)*3 + (col/3); // Compute which box the coordinate belongs to based on its row/col position
 
 				int num = this.board[row][col];
 				if (!this.row_seen.get(row).contains(num)   // If the rows_seen does not have that number 
