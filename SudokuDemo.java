@@ -8,25 +8,59 @@ public class SudokuDemo {
 		puzz.addInitial();
 		puzz.display();
 		Scanner scan = new Scanner(System.in);
+		boolean keep_playing;
+		keep_playing = true;
 
-		while (true) {
+		while ( (keep_playing) && (!puzz.isFull()) ){
 
-			int row = scan.nextInt();
-			int col = scan.nextInt();
-			int number = scan.nextInt(); // get number to put in
+			//TODO: menu option - something liek this or whatever?
+			System.out.println("**1) Make a guess (Row, Col, Value) in that order and press Enter each time"
+					+ "\n" + "**2) Puzzle Reset (from previous start)" 
+					+ "\n" + "**3) New Puzzle  (start a brand new one)" 
+			    	+ "\n" + "**4) Quit Game! ");
 
-			puzz.addGuess(row, col, number); // this function only allows valid input
-			puzz.display();
+			int action = scan.nextInt();
 
-			System.out.println("You wanna restart from beginning?");
-			// process input, invoke puzz.reset();
-			System.out.println("You wanna just get a brand new puzzle?");
-			// puzz = new SudokuPuzzle(); // remakes 
-			System.out.println("You wanna quit game?");
-			// continue = false;
+			switch (action) {
+				case 1: 
 
-		}
+					while(true){
+						System.out.println("**Input:Row Col Value. Value: 0 to erase. 1-9 for guess");
+						int row = scan.nextInt();
+						int col = scan.nextInt();
+						int number = scan.nextInt();
 
-	}
+						if (puzz.addGuess(row, col, number)){  // Only displays if valid
+							puzz.display();
+							break; // breaks the while
+						} else {
+							System.out.println("**Yo, this is not allowed!");
+						}
+					}
+					break; // breaks the case
+
+				case 2: 
+					System.out.println("**Resetting to initial state\n");
+					puzz.reset();
+					puzz.display();
+					break;
+
+				case 3:
+					System.out.println("**Here's a brand new puzzle\n");
+					puzz = new SudokuPuzzle();
+					puzz.addInitial();
+					puzz.display();
+					break;
+				case 4:
+					keep_playing = false;
+					break;
+			}
+
+		} // end infinite loop
+
+		String message = puzz.isFull() ? ("You win!"):("You suck!");
+		System.out.println(message);
+
+	} // end main
 	
-}
+} // end class
