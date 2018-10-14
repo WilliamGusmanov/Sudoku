@@ -1,3 +1,5 @@
+
+
 import java.util.*;
 import java.util.Random;
 
@@ -72,35 +74,72 @@ public class SudokuPuzzle {
 			Set<Integer> numbers_set = this.allowed_values.get(vacant_coordinate); // Get all the allowed numbers it can be
 			int value = produceValue(numbers_set); // Randomly pick one of the numbers
 			
-			// Update the board & start
-			this.board[random_row][random_col] = value;
+			// Update the start
 			this.start[random_row][random_col] = true; 
+
+			this.updateVacanciesAndAllowedValues(random_row,random_col, value); // fix the vacancies and allowed values
+			this.board[random_row][random_col] = value;  // update the board with the value
 			
+		} // end 15 iterations
+	} // end addInitial method
+
+	private void updateVacanciesAndAllowedValues(int row, int col, int value) { // updates 
+			
+		// Update the board & start
+		boolean isErasing = (value == 0); 
+		int previous_value = this.board[row][col]; // remember the previous value
+		
+		boolean previously_Empty = false;
+		if (previous_value == 0){ // if it was previously empty
+			previously_Empty = true;
+		}
+
+		if (isErasing){ 
+			this.vacancies.add(row*10 + col); // That spot is now vacant
+		} else { // Else we're changing guess - no new vacancie
+			;
+		}
+
 			// Update the allowed_values:
 			int key; // to access the allowed values
 
 			for (int j = 0; j < 9; j++) {  // updating every member of the same row
-				key = random_row*10 + j;
-				this.allowed_values.get(key).remove(value);
+				key = row*10 + j;
+
+				this.allowed_values.get(key).remove(value); // Remove the value we're changing
+				
+				if (!previously_Empty){
+					this.allowed_values.get(key).add(previous_value); // Refund the previous value
+				} // end if
 			}
 
 			for (int i = 0; i <9; i++) { // updating every member of the same column
-				key = i*10 + random_col;
-				this.allowed_values.get(key).remove(value);
+				key = i*10 + col;
+				
+				this.allowed_values.get(key).remove(value); // remove new value
+				
+				if (!previously_Empty){
+					this.allowed_values.get(key).add(previous_value); // refund previous
+				}//end if
 			}
 
 			// updating every member of the same "box": see below diagram for derivation of the formula
-			int box_row = (random_row/3)*3 ; // {0,1,2} --> 0 ; {3,4,5} --> 3 ; { 6,7,8} --> 6;
-			int box_col = (random_col/3)*3 ;
+			int box_row = (row/3)*3 ; // {0,1,2} --> 0 ; {3,4,5} --> 3 ; { 6,7,8} --> 6;
+			int box_col = (col/3)*3 ;
 
 			for (int i = box_row ; i < box_row + 3 ; i++ ){ // each box is 3 x 3 
 				for (int j = box_col ; j < box_col + 3 ; j++){ 
 					key = i*10 + j;
+				
 					this.allowed_values.get(key).remove(value);
+				
+				if (!previously_Empty){
+					this.allowed_values.get(key).add(previous_value);
+				} // end if
 				} //end j for
 			} // end i for
-		} // end 15 iterations
-	} // end addInitial method
+
+	}
 	
 	public void display(){ // board display
 
@@ -132,22 +171,23 @@ public class SudokuPuzzle {
 		}
 	}
 
-	public void addGuess(int row, int col, int value){
+	public boolean addGuess(int row, int col, int value){ // -> Boolean if it's a valid guess or not
 
 		int key = row*10 + col;
 		boolean isempty = this.vacancies.contains(key);
 		boolean isallowed = this.allowed_values.get(key).contains(value);
+		boolean iszero = (value == 0) && (!this.start[row][col]); // zero means remove entry if its not a start
 
-		if (isempty && isallowed){
+		if ( (isempty && isallowed) || iszero){
+			this.updateVacanciesAndAllowedValues(row,col,value); // update before adding in case they are erasing
 			this.board[row][col] = value;
-			this.vacancies.remove(key);
-			this.allowed_values.get(key).remove(value);
+			return true;
 		} else {
-			System.out.println("Sorry, this guess is not allowed! ");
+			return false;
 		}
 	}
 
-	public boolean isFull(){ // checks for a full oard
+	public boolean isFull(){ // checks for a full board
 		return this.vacancies.size() == 0;
 	}	
 
@@ -156,9 +196,9 @@ public class SudokuPuzzle {
 			for (int j = 0; j <9 ; j++){
 				if (!this.start[i][j]){
 					this.board[i][j] = 0;
-				}
-			}
-		}
-	}
+				} // end if
+			} // end j
+		} // end i
+	}// end reset method
 
 }
