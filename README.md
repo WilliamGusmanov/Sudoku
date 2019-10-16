@@ -1,3 +1,3 @@
 # Sukoko111B
-Implementation of Sodoku
+Implementation of Sudoku
 with the Williams
